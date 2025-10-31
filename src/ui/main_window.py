@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from loguru import logger
-from PySide6.QtCore import QSettings, Qt
+from PySide6.QtCore import QSettings, Qt, QTimer
 from PySide6.QtGui import QAction, QCloseEvent, QIcon
 from PySide6.QtWidgets import (
     QApplication,
@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 
 from quantum_engine.backend_manager import BackendManager
 from .styles import Theme
+from .utils import UpdateChecker
 from .widgets import AnalyticsWidget, PortfolioWidget, QuantumWidget, ResultsWidget, TradingWidget
 
 
@@ -43,6 +44,7 @@ class MainWindow(QMainWindow):
         self._create_toolbar()
         self._create_status_bar()
         self._create_central_tabs()
+        self._init_update_checker()
         self._restore_state()
 
     def _configure_window(self) -> None:
@@ -170,6 +172,26 @@ class MainWindow(QMainWindow):
         except Exception as exc:
             logger.error("Failed to refresh backend status: {}", exc)
             self._status_label.setText("Backend: Unavailable")
+
+    def _init_update_checker(self) -> None:
+        try:
+            from quantum_portfolio_optimizer import __version__
+        except Exception:  # pragma: no cover - fallback if metadata missing
+            __version__ = "0.0.0"
+
+        download_dir = Path.home() / "Downloads"
+
+        self.update_checker = UpdateChecker(
+            manifest_url="https://example.com/quantum-portfolio/updates.json",
+            current_version=__version__,
+            download_dir=download_dir,
+            notifier=self._notify_update_available,
+        )
+        QTimer.singleShot(5_000, self.update_checker.check_async)
+
+    def _notify_update_available(self, info) -> None:
+        message = f"Update {info.version} available. Release notes: {info.release_notes}"
+        self.statusBar().showMessage(message, 15_000)
 
     def _open_portfolio(self) -> None:
         file_path, _ = QFileDialog.getOpenFileName(

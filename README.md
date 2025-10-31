@@ -60,6 +60,12 @@ Quantum Portfolio Optimizer is a desktop application that explores quantum-enhan
    python scripts/validate_setup.py
    ```
 
+## Packaging & Releases
+
+- Generate application icons: `python packaging/icons/generate_icons.py`
+- Build installers: `python scripts/build_release.py --platforms macos windows`
+- Update packaging workflow details: see `docs/packaging.md`
+
 ## Usage
 
 1. Ensure the `.env` file is configured with IBM Quantum and Alpha Vantage credentials.
