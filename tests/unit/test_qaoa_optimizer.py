@@ -8,7 +8,7 @@ from typing import Generator
 
 import numpy as np
 import pytest
-from qiskit.primitives import StatevectorSampler
+from qiskit.primitives import Sampler
 
 from quantum_engine.backend_manager import BackendManager
 from quantum_engine.portfolio_qubo import PortfolioQUBO
@@ -55,8 +55,8 @@ def mocked_backend_manager(monkeypatch: pytest.MonkeyPatch) -> BackendManager:
     manager = BackendManager()
 
     @contextmanager
-    def fake_sampler(*args, **kwargs) -> Generator[StatevectorSampler, None, None]:
-        yield StatevectorSampler()
+    def fake_sampler(*args, **kwargs) -> Generator[Sampler, None, None]:
+        yield Sampler()
 
     def passthrough_executor(executor, description):
         return executor()
@@ -77,7 +77,7 @@ def test_optimize_portfolio_with_mock_backend(
     fake_result = SimpleNamespace(eigenvalue=0.0, eigenstate={"11000": 1.0})
 
     monkeypatch.setattr(
-        "qiskit.algorithms.minimum_eigensolvers.QAOA.compute_minimum_eigenvalue",
+        "qiskit_algorithms.minimum_eigensolvers.qaoa.QAOA.compute_minimum_eigenvalue",
         lambda self, operator: fake_result,
     )
 
@@ -94,11 +94,11 @@ def test_quantum_performance_matches_classical(
 ) -> None:
     optimizer = QuantumPortfolioOptimizer(num_layers=1, backend_manager=mocked_backend_manager)
 
-    candidate_bitstring = "11000"
+    candidate_bitstring = "01010"
     fake_result = SimpleNamespace(eigenvalue=-1.0, eigenstate={candidate_bitstring: 1.0})
 
     monkeypatch.setattr(
-        "qiskit.algorithms.minimum_eigensolvers.QAOA.compute_minimum_eigenvalue",
+        "qiskit_algorithms.minimum_eigensolvers.qaoa.QAOA.compute_minimum_eigenvalue",
         lambda self, operator: fake_result,
     )
 

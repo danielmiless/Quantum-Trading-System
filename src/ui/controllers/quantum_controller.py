@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from typing import Any, List, Optional
 
@@ -66,7 +67,6 @@ class QuantumController(QObject):
 
         job_config = config or QuantumJobConfig()
 
-        self._thread = QThread(self)
         optimizer = QuantumPortfolioOptimizer(
             risk_factor=job_config.risk_factor,
             num_layers=job_config.num_layers,
@@ -80,6 +80,14 @@ class QuantumController(QObject):
             shots=job_config.shots,
         )
 
+        if os.getenv("QPO_SYNC_QUANTUM", "").lower() in {"1", "true", "yes"}:
+            logger.debug("Running quantum optimization synchronously")
+            self._worker.run()
+            self._worker = None
+            self._thread = None
+            return
+
+        self._thread = QThread(self)
         self._worker.moveToThread(self._thread)
         self._thread.started.connect(self._worker.run)
         self._worker.finished.connect(self._cleanup_thread)

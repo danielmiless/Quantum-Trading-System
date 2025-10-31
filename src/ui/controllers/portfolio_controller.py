@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Iterable, List
 
@@ -54,7 +54,7 @@ class PortfolioController(QObject):
             raise ValueError("Total allocation must sum to 100%")
 
         payload = {
-            "assets": [asset.__dict__ for asset in asset_list],
+            "assets": [asdict(asset) for asset in asset_list],
             "risk_aversion": risk_aversion,
             "max_assets": max_assets,
         }

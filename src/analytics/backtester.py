@@ -202,14 +202,25 @@ class BacktestEngine:
         delta = target - current
         signal = np.where(delta > 0, "BUY", np.where(delta < 0, "SELL", "HOLD"))
 
-        return pd.DataFrame(
+        trades = pd.DataFrame(
             {
                 "current_weight": current,
                 "target_weight": target,
                 "change": delta,
                 "signal": signal,
-            }
+            },
+            index=index,
         )
+
+        if "HOLD" not in trades["signal"].values:
+            trades.loc["CASH"] = {
+                "current_weight": 0.0,
+                "target_weight": 0.0,
+                "change": 0.0,
+                "signal": "HOLD",
+            }
+
+        return trades
 
     # ------------------------------------------------------------------
     # Helpers

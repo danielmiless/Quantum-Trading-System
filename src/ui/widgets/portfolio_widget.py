@@ -9,9 +9,10 @@ from typing import Any
 
 import numpy as np
 from loguru import logger
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon, QStringListModel
+from PySide6.QtCore import Qt, QStringListModel
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
+    QCompleter,
     QFileDialog,
     QFormLayout,
     QGroupBox,
@@ -93,8 +94,6 @@ class PortfolioWidget(QWidget):
         return row
 
     def _create_completer(self, model: QStringListModel) -> Any:
-        from PySide6.QtWidgets import QCompleter
-
         completer = QCompleter(model, self)
         completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
@@ -186,6 +185,11 @@ class PortfolioWidget(QWidget):
         return item
 
     def _handle_table_change(self, item: QTableWidgetItem) -> None:
+        if item.column() == 0:
+            item.setText(item.text().strip().upper())
+            self._update_summary()
+            return
+
         try:
             float(item.text())
         except ValueError:

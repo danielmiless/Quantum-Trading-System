@@ -144,23 +144,22 @@ class QuantumWidget(QWidget):
 
     def start_optimization(self) -> None:
         selected_item = self.backend_list.currentItem()
-        backend_name = (
-            selected_item.data(Qt.ItemDataRole.UserRole)
-            if selected_item is not None
-            else "AerSimulator"
-        )
+        backend_name = "AerSimulator"
+        if selected_item is not None:
+            backend_data = selected_item.data(Qt.ItemDataRole.UserRole)
+            backend_name = backend_data or selected_item.text() or backend_name
         self.backend_label.setText(str(backend_name))
         self.job_status_label.setText("Submitted")
         self.progress_bar.setVisible(True)
         self.progress_bar.setRange(0, 0)
 
         self._active_job = {
-            "backend": backend_name,
+            "backend_name": backend_name,
             "layers": self.layers_spin.value(),
             "iterations": self.iterations_spin.value(),
             "shots": self.shots_spin.value(),
         }
-        log_quantum_job("submitted", backend=backend_name, **self._active_job)
+        log_quantum_job("submitted", **self._active_job)
         self._job_monitor_timer.start()
 
     def _poll_job_status(self) -> None:
@@ -183,7 +182,7 @@ class QuantumWidget(QWidget):
         if next_status == "Completed":
             self.progress_bar.setVisible(False)
             self._job_monitor_timer.stop()
-            log_quantum_job("completed", backend=self._active_job.get("backend"))
+            log_quantum_job("completed", backend_name=self._active_job.get("backend_name"))
             self._active_job = None
 
     def _on_job_started(self, job_id: str) -> None:

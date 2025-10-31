@@ -9,8 +9,8 @@ from typing import Iterable, Sequence
 import numpy as np
 from loguru import logger
 from qiskit import QuantumCircuit
-from qiskit.algorithms.minimum_eigensolvers import QAOA
-from qiskit.algorithms.optimizers import COBYLA
+from qiskit_algorithms.minimum_eigensolvers import QAOA
+from qiskit_algorithms.optimizers import COBYLA
 from qiskit.quantum_info import SparsePauliOp
 from qiskit.result import QuasiDistribution
 

@@ -52,7 +52,7 @@ class ExecutionEngine:
         return orders
 
     def _split_order(self, symbol: str, qty: float, side: str) -> List[Order]:
-        if qty <= self.min_order_size:
+        if qty < self.min_order_size:
             return [Order(symbol, qty, side)]
         slice_qty = qty / self.twap_slices
         return [Order(symbol, slice_qty, side) for _ in range(self.twap_slices)]

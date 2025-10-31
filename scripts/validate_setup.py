@@ -11,12 +11,13 @@ from loguru import logger
 
 REQUIRED_PYTHON = (3, 11)
 REQUIRED_PACKAGES = {
-    "qiskit": "0.43.1",
-    "qiskit_aer": "0.12.0",
-    "qiskit_ibm_runtime": "0.11.0",
-    "PySide6": "6.5.1",
+    "qiskit": "0.46.0",
+    "qiskit_aer": "0.13.3",
+    "qiskit_ibm_runtime": "0.20.0",
+    "qiskit_algorithms": "0.3.0",
+    "PySide6": "6.7.2",
     "pandas": "2.0.3",
-    "numpy": "1.24.3",
+    "numpy": "1.24.4",
     "matplotlib": "3.7.1",
     "yfinance": "0.2.18",
     "dotenv": "1.0.0",

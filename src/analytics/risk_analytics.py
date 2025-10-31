@@ -68,7 +68,6 @@ class RiskAnalyzer:
         if series.empty:
             raise ValueError("Returns series cannot be empty")
         mean = series.mean()
-        cov = series.cov()
         sigma = series.std(ddof=0)
         if sigma == 0:
             return max(-mean, 0.0)

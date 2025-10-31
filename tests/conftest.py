@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import os
 import sys
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+os.environ.setdefault("MPLBACKEND", "Agg")
+os.environ.setdefault("QPO_SYNC_QUANTUM", "1")
 from pathlib import Path
 
 

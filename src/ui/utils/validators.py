@@ -28,6 +28,18 @@ class PercentageValidator(QDoubleValidator):
         super().__init__(0.0, 100.0, 2)
         self.setNotation(QDoubleValidator.Notation.StandardNotation)
 
+    def validate(self, input_str: str, pos: int):  # type: ignore[override]
+        if not input_str:
+            return QValidator.State.Intermediate, input_str, pos
+        try:
+            value = float(input_str)
+        except ValueError:
+            return QValidator.State.Invalid, input_str, pos
+
+        if 0.0 <= value <= 100.0:
+            return QValidator.State.Acceptable, f"{value:.2f}", pos
+        return QValidator.State.Invalid, input_str, pos
+
 
 class NumericRangeValidator(QDoubleValidator):
     """Validator enforcing numeric ranges with configurable precision."""

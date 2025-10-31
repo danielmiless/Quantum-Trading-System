@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional
 
 import pandas as pd
-from alpaca_trade_api import REST, RESTError
+from alpaca_trade_api.rest import REST, APIError
 from loguru import logger
 
 
@@ -48,7 +48,7 @@ class AlpacaClient:
             }
             logger.debug("Fetched account info: {}", info)
             return info
-        except RESTError as exc:
+        except APIError as exc:
             logger.error("Failed to fetch Alpaca account info: {}", exc)
             raise
 
@@ -77,7 +77,7 @@ class AlpacaClient:
                 "filled_avg_price": order.filled_avg_price,
                 "status": order.status,
             }
-        except RESTError as exc:
+        except APIError as exc:
             logger.error("Failed to place order: {}", exc)
             raise
 
@@ -97,7 +97,7 @@ class AlpacaClient:
             ]
             logger.debug("Retrieved {} positions", len(result))
             return result
-        except RESTError as exc:
+        except APIError as exc:
             logger.error("Failed to fetch positions: {}", exc)
             raise
 

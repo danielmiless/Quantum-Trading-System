@@ -26,8 +26,13 @@ class SignalManager(QObject):
     def __new__(cls, *args, **kwargs) -> "SignalManager":
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            QObject.__init__(cls._instance)
         return cls._instance
+
+    def __init__(self) -> None:
+        if getattr(self, "_initialized", False):  # pragma: no cover - defensive
+            return
+        super().__init__()
+        self._initialized = True
 
     @classmethod
     def instance(cls) -> "SignalManager":

@@ -193,11 +193,29 @@ class BackendManager:
                     logger.warning("Failed to close IBM Quantum session: {}", exc)
 
     def _fallback_sampler(self, shots: int) -> Any:
-        if AerSampler is not None:
+        use_aer = os.getenv("QPO_ENABLE_AER", "").lower() in {"1", "true", "yes"}
+        if use_aer and AerSampler is not None:
             logger.info("Using AerSampler fallback with {} shots", shots)
-            return AerSampler(options={"shots": shots})
+            sampler = AerSampler()
+            try:
+                sampler.options.shots = shots  # type: ignore[attr-defined]
+            except AttributeError:  # pragma: no cover - legacy interface
+                try:
+                    sampler.set_options(shots=shots)  # type: ignore[call-arg]
+                except AttributeError:
+                    logger.warning("AerSampler does not expose options API; using defaults")
+            return sampler
+
         logger.info("Using reference Sampler fallback with {} shots", shots)
-        return ReferenceSampler()
+        sampler = ReferenceSampler()
+        try:
+            sampler.options.shots = shots  # type: ignore[attr-defined]
+        except AttributeError:  # pragma: no cover - older versions
+            try:
+                sampler.set_options(shots=shots)  # type: ignore[call-arg]
+            except AttributeError:
+                logger.debug("ReferenceSampler ignoring shots configuration")
+        return sampler
 
     def monitor_job(
         self,
