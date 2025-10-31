@@ -99,11 +99,12 @@ def check_qiskit_circuit() -> ValidationResult:
         circuit = QuantumCircuit(2)
         circuit.h(0)
         circuit.cx(0, 1)
+        circuit.measure_all()
 
         simulator = AerSimulator()
-        job = simulator.run(circuit)
+        job = simulator.run(circuit, shots=512)
         result = job.result()
-        counts = result.get_counts()
+        counts = result.get_counts(0)
         detail = f"Circuit executed successfully with counts: {counts}"
         logger.debug(detail)
         return ValidationResult(label="Qiskit Circuit", success=True, detail=detail)
@@ -130,10 +131,12 @@ def run_validation() -> int:
 
     for result in results:
         log_method = logger.success if result.success else logger.error
-        log_method("%s: %s", result.label, result.detail)
+        log_method("{}: {}", result.label, result.detail)
 
     if failures:
-        logger.error("Validation failed with %d issues", len(failures))
+        for failed in failures:
+            logger.error("Failure -> {}: {}", failed.label, failed.detail)
+        logger.error("Validation failed with {} issues", len(failures))
         return 1
 
     logger.success("Environment validation completed successfully")
