@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 PACKAGE := quantum_portfolio_optimizer
 PYTHON := python3
+SRC_DIRS := $(PACKAGE) src tests scripts
 
 .PHONY: install test format lint clean
 
@@ -13,12 +14,12 @@ test:
 	$(PYTHON) -m pytest
 
 format:
-	$(PYTHON) -m black $(PACKAGE) tests scripts
-	$(PYTHON) -m isort $(PACKAGE) tests scripts
+	$(PYTHON) -m black $(SRC_DIRS)
+	$(PYTHON) -m isort $(SRC_DIRS)
 
 lint:
-	$(PYTHON) -m flake8 $(PACKAGE) scripts tests
-	$(PYTHON) -m mypy $(PACKAGE) scripts
+	$(PYTHON) -m flake8 $(PACKAGE) src scripts tests
+	$(PYTHON) -m mypy $(PACKAGE) src scripts
 
 clean:
 	rm -rf build dist .pytest_cache .mypy_cache .ruff_cache

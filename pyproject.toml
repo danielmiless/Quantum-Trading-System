@@ -41,6 +41,13 @@ dev = [
     "pytest-cov==4.0.0"
 ]
 
+[tool.setuptools]
+package-dir = { "quantum_engine" = "src/quantum_engine", "utils" = "src/utils", "quantum_portfolio_optimizer" = "quantum_portfolio_optimizer", "ui" = "src/ui" }
+
+[tool.setuptools.packages.find]
+where = [".", "src"]
+include = ["quantum_portfolio_optimizer*", "quantum_engine*", "utils*", "ui*"]
+
 [tool.black]
 line-length = 88
 target-version = ["py311"]
@@ -52,12 +59,12 @@ line_length = 88
 
 [tool.pytest.ini_options]
 minversion = "7.4"
-addopts = "--cov=quantum_portfolio_optimizer --cov-report=term-missing --strict-markers"
+addopts = "--cov=quantum_portfolio_optimizer --cov=quantum_engine --cov=utils --cov-report=term-missing --strict-markers"
 testpaths = ["tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["quantum_portfolio_optimizer"]
+source = ["quantum_portfolio_optimizer", "quantum_engine", "utils"]
 
 [tool.coverage.report]
 show_missing = true
