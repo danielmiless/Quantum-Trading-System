@@ -59,12 +59,12 @@ line_length = 88
 
 [tool.pytest.ini_options]
 minversion = "7.4"
-addopts = "--cov=quantum_portfolio_optimizer --cov=quantum_engine --cov=utils --cov-report=term-missing --strict-markers"
+addopts = "--cov=quantum_portfolio_optimizer --cov=quantum_engine --cov=utils --cov=ui --cov-report=term-missing --strict-markers"
 testpaths = ["tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["quantum_portfolio_optimizer", "quantum_engine", "utils"]
+source = ["quantum_portfolio_optimizer", "quantum_engine", "utils", "ui"]
 
 [tool.coverage.report]
 show_missing = true

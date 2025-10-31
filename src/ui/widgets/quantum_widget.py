@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 
 from quantum_engine.backend_manager import BackendManager
 from utils.logger import log_quantum_job
+from ..utils.signal_manager import SignalManager
 
 
 class QuantumWidget(QWidget):
@@ -33,7 +34,9 @@ class QuantumWidget(QWidget):
         self._job_monitor_timer.setInterval(2_000)
         self._job_monitor_timer.timeout.connect(self._poll_job_status)
         self._active_job = None
+        self._signal_manager = SignalManager.instance()
         self._setup_ui()
+        self._register_signals()
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
@@ -44,6 +47,13 @@ class QuantumWidget(QWidget):
         layout.addWidget(self._build_status_group())
 
         layout.addStretch(1)
+
+    def _register_signals(self) -> None:
+        self._signal_manager.quantum_job_started.connect(self._on_job_started)
+        self._signal_manager.quantum_job_progress.connect(self._on_job_progress)
+        self._signal_manager.quantum_job_completed.connect(self._on_job_completed)
+        self._signal_manager.quantum_job_failed.connect(self._on_job_failed)
+        self._signal_manager.quantum_job_cancelled.connect(self._on_job_cancelled)
 
     def _build_backend_group(self) -> QWidget:
         group = QGroupBox("Quantum Backends")
@@ -175,4 +185,31 @@ class QuantumWidget(QWidget):
             self._job_monitor_timer.stop()
             log_quantum_job("completed", backend=self._active_job.get("backend"))
             self._active_job = None
+
+    def _on_job_started(self, job_id: str) -> None:
+        self.progress_bar.setVisible(True)
+        self.job_status_label.setText("Started")
+
+    def _on_job_progress(self, value: int, message: str) -> None:
+        if self.progress_bar.isVisible():
+            self.progress_bar.setRange(0, 100)
+            self.progress_bar.setValue(value)
+        self.job_status_label.setText(message)
+        self.wait_time_label.setText(message)
+
+    def _on_job_completed(self, payload: dict[str, Any]) -> None:
+        self.progress_bar.setVisible(False)
+        self.job_status_label.setText("Completed")
+        self.queue_label.setText("0")
+        self.wait_time_label.setText("Done")
+
+    def _on_job_failed(self, reason: str) -> None:
+        self.progress_bar.setVisible(False)
+        self.job_status_label.setText("Error")
+        self.wait_time_label.setText(reason)
+
+    def _on_job_cancelled(self, message: str) -> None:
+        self.progress_bar.setVisible(False)
+        self.job_status_label.setText("Cancelled")
+        self.wait_time_label.setText(message)
 
