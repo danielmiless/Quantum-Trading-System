@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 
-from packaging.build import build_release
+from qpo_packaging.build import build_release
 
 
 def parse_args() -> argparse.Namespace:

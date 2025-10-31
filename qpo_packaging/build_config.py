@@ -35,22 +35,23 @@ class BuildConfig:
 
     @classmethod
     def default(cls, base_dir: Path) -> "BuildConfig":
-        packaging_dir = base_dir / "packaging"
+        packaging_dir = base_dir / "qpo_packaging"
         icons_dir = packaging_dir / "icons" / "dist"
         dist_dir = base_dir / "dist"
         build_dir = base_dir / "build"
+        fallback_icon_dir = packaging_dir / "icons"
         platforms = {
             "macos": PlatformConfig(
                 name="macOS",
                 entry_script=base_dir / "src" / "ui" / "main.py",
-                icon_path=icons_dir / "app.icns",
+                icon_path=(icons_dir / "app.icns") if (icons_dir / "app.icns").exists() else fallback_icon_dir / "fallback.icns",
                 output_dir=dist_dir / "macos",
                 installer_template=packaging_dir / "templates" / "dmg.json",
             ),
             "windows": PlatformConfig(
                 name="Windows",
                 entry_script=base_dir / "src" / "ui" / "main.py",
-                icon_path=icons_dir / "app.ico",
+                icon_path=(icons_dir / "app.ico") if (icons_dir / "app.ico").exists() else fallback_icon_dir / "fallback.ico",
                 output_dir=dist_dir / "windows",
                 installer_template=packaging_dir / "templates" / "nsis.nsi",
             ),
@@ -66,5 +67,4 @@ class BuildConfig:
             update_manifest_url="https://example.com/quantum-portfolio/updates.json",
             platforms=platforms,
         )
-
 

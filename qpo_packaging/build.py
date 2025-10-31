@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Iterable
 
 from loguru import logger
+from PIL import Image
 
 from .build_config import BuildConfig, PlatformConfig
 
@@ -28,6 +29,7 @@ def build_target(config: BuildConfig, platform_key: str) -> Path:
     logger.info("Building {} release", platform.name)
 
     _prepare_directories(platform.output_dir, config.build_dir)
+    _ensure_icon(platform.icon_path)
     spec_path = _generate_spec(config, platform)
 
     _run_pyinstaller(spec_path)
@@ -58,10 +60,13 @@ def _prepare_directories(output_dir: Path, build_dir: Path) -> None:
 
 def _generate_spec(config: BuildConfig, platform: PlatformConfig) -> Path:
     spec_path = config.build_dir / f"{config.app_name.replace(' ', '_').lower()}_{platform.name.lower()}.spec"
-    datas = [
-        (str(config.base_dir / "resources"), "resources"),
-        (str(config.base_dir / "packaging" / "update_manifest.json"), "."),
-    ]
+    datas = []
+    resources_dir = config.base_dir / "resources"
+    if resources_dir.exists():
+        datas.append((str(resources_dir), "resources"))
+    manifest_path = config.base_dir / "qpo_packaging" / "update_manifest.json"
+    if manifest_path.exists():
+        datas.append((str(manifest_path), "."))
     spec_content = f"""
 # -*- mode: python -*-
 block_cipher = None
@@ -117,7 +122,7 @@ def _build_macos_installer(config: BuildConfig, platform: PlatformConfig) -> Non
     app_bundle = platform.output_dir / f"{config.app_name.replace(' ', '_')}.app"
     dmg_path = platform.output_dir / f"{config.app_name.replace(' ', '_')}-{config.version}.dmg"
     create_dmg = shutil.which("create-dmg")
-    if create_dmg:
+    if create_dmg and sys.platform == "darwin" and app_bundle.exists():
         subprocess.run(
             [
                 create_dmg,
@@ -127,28 +132,45 @@ def _build_macos_installer(config: BuildConfig, platform: PlatformConfig) -> Non
             ],
             check=True,
         )
+    elif sys.platform == "darwin" and shutil.which("hdiutil") and app_bundle.exists():
+        subprocess.run(
+            [
+                "hdiutil",
+                "create",
+                "-fs",
+                "HFS+",
+                "-volname",
+                config.app_name,
+                "-srcfolder",
+                str(app_bundle),
+                str(dmg_path),
+            ],
+            check=True,
+        )
     else:
-        logger.warning("create-dmg not found; skipping DMG creation")
+        logger.warning("DMG tooling unavailable; creating ZIP archive instead")
+        shutil.make_archive(str(platform.output_dir / f"{config.app_name.replace(' ', '_')}-{config.version}"), "zip", platform.output_dir)
 
 
 def _build_windows_installer(config: BuildConfig, platform: PlatformConfig) -> None:
     nsis = shutil.which("makensis")
     script_template = platform.installer_template
-    if not nsis or not script_template or not script_template.exists():
-        logger.warning("NSIS not configured; skipping Windows installer build")
-        return
-    script = script_template.read_text(encoding="utf-8").format(
-        APP_NAME=config.app_name,
-        VERSION=config.version,
-        SOURCE_DIR=platform.output_dir,
-    )
-    temp_script = platform.output_dir / "installer.nsi"
-    temp_script.write_text(script, encoding="utf-8")
-    subprocess.run([nsis, str(temp_script)], check=True)
+    if nsis and script_template and script_template.exists() and sys.platform.startswith("win"):
+        script = script_template.read_text(encoding="utf-8").format(
+            APP_NAME=config.app_name,
+            VERSION=config.version,
+            SOURCE_DIR=platform.output_dir,
+        )
+        temp_script = platform.output_dir / "installer.nsi"
+        temp_script.write_text(script, encoding="utf-8")
+        subprocess.run([nsis, str(temp_script)], check=True)
+    else:
+        logger.warning("NSIS unavailable; packaging Windows build as ZIP")
+        shutil.make_archive(str(platform.output_dir / f"{config.app_name.replace(' ', '_')}-{config.version}"), "zip", platform.output_dir)
 
 
 def _generate_update_manifest(config: BuildConfig) -> None:
-    manifest_path = config.base_dir / "packaging" / "update_manifest.json"
+    manifest_path = config.base_dir / "qpo_packaging" / "update_manifest.json"
     manifest = {
         "app": config.app_name,
         "version": config.version,
@@ -157,8 +179,31 @@ def _generate_update_manifest(config: BuildConfig) -> None:
             key: f"https://example.com/downloads/{config.app_name.replace(' ', '_')}-{config.version}-{key}.zip"
             for key in config.platforms
         },
-        "release_notes": "https://example.com/releases/notes/{config.version}",
+        "release_notes": f"https://example.com/releases/notes/{config.version}",
     }
     manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
+
+def _ensure_icon(icon_path: Path) -> None:
+    if icon_path.exists():
+        return
+    icon_path.parent.mkdir(parents=True, exist_ok=True)
+    size = 256
+    image = Image.new("RGBA", (size, size), (30, 30, 68, 255))
+    temp_png = icon_path.with_suffix(".png")
+    image.save(temp_png)
+    if icon_path.suffix.lower() == ".ico":
+        image.save(icon_path, format="ICO")
+    elif icon_path.suffix.lower() == ".icns":
+        if sys.platform == "darwin" and shutil.which("iconutil"):
+            iconset = icon_path.parent / "temp.iconset"
+            iconset.mkdir(exist_ok=True)
+            for dim in [16, 32, 64, 128, 256, 512]:
+                resized = image.resize((dim, dim), Image.LANCZOS)
+                resized.save(iconset / f"icon_{dim}x{dim}.png")
+            subprocess.run(["iconutil", "-c", "icns", "-o", str(icon_path), str(iconset)], check=True)
+            shutil.rmtree(iconset, ignore_errors=True)
+        else:
+            image.save(icon_path.with_suffix(".png"))
+    temp_png.unlink(missing_ok=True)
 

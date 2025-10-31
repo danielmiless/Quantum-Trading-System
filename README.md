@@ -62,7 +62,7 @@ Quantum Portfolio Optimizer is a desktop application that explores quantum-enhan
 
 ## Packaging & Releases
 
-- Generate application icons: `python packaging/icons/generate_icons.py`
+- Generate application icons: `python qpo_packaging/icons/generate_icons.py`
 - Build installers: `python scripts/build_release.py --platforms macos windows`
 - Update packaging workflow details: see `docs/packaging.md`
 

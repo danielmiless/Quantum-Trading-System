@@ -9,7 +9,7 @@ This document outlines the desktop packaging workflow for the Quantum Portfolio 
 - Installers:
   - macOS DMG (requires `create-dmg` and optional codesigning identity)
   - Windows NSIS installer (requires `makensis`)
-- Icons generated via `packaging/icons/generate_icons.py`
+- Icons generated via `qpo_packaging/icons/generate_icons.py`
 
 ## Prerequisites
 
@@ -24,7 +24,7 @@ This document outlines the desktop packaging workflow for the Quantum Portfolio 
 python scripts/build_release.py --platforms macos windows
 ```
 
-Artifacts are written to `dist/<platform>/`. Update manifests are regenerated in `packaging/update_manifest.json`.
+Artifacts are written to `dist/<platform>/`. Update manifests are regenerated in `qpo_packaging/update_manifest.json`.
 
 ## Auto Updates
 
@@ -37,7 +37,7 @@ Artifacts are written to `dist/<platform>/`. Update manifests are regenerated in
 
 ## Code Signing
 
-Configure signing identities in `packaging/build_config.py` or via environment variables. The build script is structured to integrate `codesign` and `signtool` commands where required.
+Configure signing identities in `qpo_packaging/build_config.py` or via environment variables. The build script is structured to integrate `codesign` and `signtool` commands where required.
 
 ## Release Automation
 

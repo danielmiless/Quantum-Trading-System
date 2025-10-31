@@ -1,4 +1,4 @@
-"""Packaging utilities for building desktop distributions."""
+"""Release packaging utilities for the Quantum Portfolio Optimizer."""
 
 from .build import build_release, build_target
 from .build_config import BuildConfig, PlatformConfig

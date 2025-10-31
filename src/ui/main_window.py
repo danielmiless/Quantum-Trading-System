@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from loguru import logger
@@ -174,6 +175,11 @@ class MainWindow(QMainWindow):
             self._status_label.setText("Backend: Unavailable")
 
     def _init_update_checker(self) -> None:
+        manifest_url = os.getenv("QPO_UPDATE_URL")
+        if not manifest_url:
+            logger.info("Update checks disabled (QPO_UPDATE_URL not set)")
+            return
+
         try:
             from quantum_portfolio_optimizer import __version__
         except Exception:  # pragma: no cover - fallback if metadata missing
@@ -182,7 +188,7 @@ class MainWindow(QMainWindow):
         download_dir = Path.home() / "Downloads"
 
         self.update_checker = UpdateChecker(
-            manifest_url="https://example.com/quantum-portfolio/updates.json",
+            manifest_url=manifest_url,
             current_version=__version__,
             download_dir=download_dir,
             notifier=self._notify_update_available,
