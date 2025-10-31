@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 )
 
 from quantum_engine.backend_manager import BackendManager
+from .controllers import TradingController
 from .styles import Theme
 from .utils import UpdateChecker
 from .widgets import AnalyticsWidget, PortfolioWidget, QuantumWidget, ResultsWidget, TradingWidget
@@ -126,7 +127,9 @@ class MainWindow(QMainWindow):
         self.quantum_widget = QuantumWidget(self.backend_manager, self)
         self.results_widget = ResultsWidget(self)
         self.analytics_widget = AnalyticsWidget(self)
-        self.trading_widget = TradingWidget(self)
+        self.trading_controller = TradingController()
+        self.trading_widget = TradingWidget(self.trading_controller, self)
+        self.trading_widget.set_manual_override_callback(self._handle_manual_override)
 
         self.tabs.addTab(self.portfolio_widget, "Portfolio Management")
         self.tabs.addTab(self.market_data_widget, "Market Data")
@@ -136,6 +139,9 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.trading_widget, "Trading")
 
         self.setCentralWidget(self.tabs)
+
+        if self.trading_controller.has_credentials():
+            self.trading_controller.connect_to_alpaca()
 
     def _build_placeholder_widget(self, title: str, description: str) -> QWidget:
         widget = QWidget(self)
@@ -198,6 +204,13 @@ class MainWindow(QMainWindow):
     def _notify_update_available(self, info) -> None:
         message = f"Update {info.version} available. Release notes: {info.release_notes}"
         self.statusBar().showMessage(message, 15_000)
+
+    def _handle_manual_override(self) -> None:
+        QMessageBox.information(
+            self,
+            "Manual Override",
+            "Manual override triggered. Integrate custom risk procedures here.",
+        )
 
     def _open_portfolio(self) -> None:
         file_path, _ = QFileDialog.getOpenFileName(

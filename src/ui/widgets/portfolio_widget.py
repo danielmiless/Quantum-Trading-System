@@ -28,6 +28,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..utils.signal_manager import SignalManager
+
 
 COMMON_TICKERS = [
     "AAPL",
@@ -61,6 +63,7 @@ class PortfolioWidget(QWidget):
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
+        self._signal_manager = SignalManager.instance()
         self._setup_ui()
 
     def _setup_ui(self) -> None:
@@ -239,6 +242,7 @@ class PortfolioWidget(QWidget):
         self.total_value_label.setText(f"{summary.total_value:.2f}")
         self.expected_return_label.setText(f"{summary.expected_return:.2f}")
         self.risk_label.setText(f"{summary.risk:.2f}")
+        self._broadcast_portfolio(portfolio, summary)
 
     def _save_portfolio(self) -> None:
         portfolio = self._gather_portfolio_data()
@@ -299,4 +303,23 @@ class PortfolioWidget(QWidget):
         self.constraint_slider.setValue(int(data.get("constraint", 30)))
         self.max_assets_spin.setValue(int(data.get("max_assets", 10)))
         self._update_summary()
+
+    def _broadcast_portfolio(
+        self, assets: list[dict[str, float | str]], summary: PortfolioSummary
+    ) -> None:
+        if not assets:
+            return
+
+        payload = {
+            "assets": assets,
+            "risk_aversion": float(self.risk_slider.value()) / 100.0,
+            "constraint": float(self.constraint_slider.value()) / 100.0,
+            "max_assets": self.max_assets_spin.value(),
+            "totals": {
+                "allocation_percent": summary.total_value,
+                "expected_return": summary.expected_return,
+                "risk_score": summary.risk,
+            },
+        }
+        self._signal_manager.portfolio_updated.emit(payload)
 

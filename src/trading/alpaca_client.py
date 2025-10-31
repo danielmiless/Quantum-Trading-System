@@ -25,10 +25,18 @@ class AlpacaClient:
     def __init__(self) -> None:
         self.api: Optional[REST] = None
 
-    def authenticate(self, api_key: str, secret_key: str, paper: bool = True) -> None:
-        base_url = "https://paper-api.alpaca.markets" if paper else "https://api.alpaca.markets"
+    def authenticate(
+        self,
+        api_key: str,
+        secret_key: str,
+        *,
+        paper: bool = True,
+        base_url: str | None = None,
+    ) -> None:
+        if base_url is None:
+            base_url = "https://paper-api.alpaca.markets" if paper else "https://api.alpaca.markets"
         self.api = REST(api_key, secret_key, base_url)
-        logger.info("Authenticated with Alpaca {} environment", "paper" if paper else "live")
+        logger.info("Authenticated with Alpaca endpoint {}", base_url)
 
     def _ensure_client(self) -> REST:
         if self.api is None:

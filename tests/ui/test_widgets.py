@@ -12,6 +12,7 @@ from ui.styles import Theme
 from ui.utils.signal_manager import SignalManager
 from ui.utils.validators import PercentageValidator, StockSymbolValidator
 from ui.widgets.portfolio_widget import PortfolioWidget
+from ui.widgets.trading_widget import TradingWidget
 from ui.widgets.quantum_widget import QuantumWidget
 from ui.widgets.results_widget import OptimizationPerformance, ResultsWidget
 
@@ -28,6 +29,16 @@ def test_portfolio_widget_add_asset(app: QApplication) -> None:
     widget._handle_symbol_submit()
     assert widget.table.rowCount() == 1
     assert widget.table.item(0, 0).text() == "AAPL"
+
+
+def test_trading_widget_button_state(app: QApplication) -> None:
+    widget = TradingWidget()
+    widget._handle_target_update(["AAPL", "MSFT"])  # type: ignore[arg-type]
+    assert not widget.preview_button.isEnabled()
+    widget._handle_connection_state(True, "Connected")
+    assert widget.preview_button.isEnabled()
+    widget._handle_status_message("info", "Preview ready")
+    assert widget.rebalance_status.text() == "Preview ready"
 
 
 def test_quantum_widget_progress_emission(monkeypatch) -> None:

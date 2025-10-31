@@ -1,50 +1,32 @@
-"""Application entrypoint for the Quantum Portfolio Optimizer UI."""
+"""Re-export the full desktop UI entry point."""
 
 from __future__ import annotations
 
-import os
 import sys
+from pathlib import Path
+from typing import Sequence
 
-from loguru import logger
-from PySide6.QtWidgets import QApplication, QLabel, QMainWindow
+from dotenv import load_dotenv
 
+# Ensure repository paths are available when running from source checkout
+_ROOT = Path(__file__).resolve().parents[1]
+_SRC = _ROOT / "src"
+for candidate in (_ROOT, _SRC):
+    candidate_str = str(candidate)
+    if candidate_str not in sys.path:
+        sys.path.insert(0, candidate_str)
 
-class QuantumPortfolioWindow(QMainWindow):
-    """Minimal placeholder window for the PySide6 application."""
+# Load environment variables from project .env if present
+load_dotenv(_ROOT / ".env", override=False)
 
-    def __init__(self) -> None:
-        super().__init__()
-        self.setWindowTitle("Quantum Portfolio Optimizer")
-        self.resize(960, 640)
-        label = QLabel("Quantum Portfolio Optimizer setup successful!", parent=self)
-        label.setObjectName("statusLabel")
-        label.setMargin(24)
-        self.setCentralWidget(label)
-
-
-def configure_logging() -> None:
-    """Configure loguru logging for the application."""
-
-    log_level = os.getenv("LOG_LEVEL", "INFO")
-    logger.remove()
-    logger.add(sys.stdout, level=log_level)
-    logger.debug("Logging initialized with level {}", log_level)
+from ui.main import main as launch_ui  # noqa: E402  (import after sys.path setup)
 
 
-def main() -> int:
-    """Launch the PySide6 application."""
+def main(argv: Sequence[str] | None = None) -> int:
+    """Launch the full Quantum Portfolio Optimizer UI."""
 
-    configure_logging()
-
-    app = QApplication(sys.argv)
-    window = QuantumPortfolioWindow()
-    window.show()
-
-    logger.info("Quantum Portfolio Optimizer UI initialized")
-    return app.exec()
+    return launch_ui(list(argv) if argv is not None else None)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover - manual invocation
     raise SystemExit(main())
-
-
