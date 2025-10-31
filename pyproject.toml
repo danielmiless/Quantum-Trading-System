@@ -28,7 +28,11 @@ dependencies = [
     "matplotlib==3.7.1",
     "yfinance==0.2.18",
     "python-dotenv==1.0.0",
-    "loguru==0.7.0"
+    "loguru==0.7.0",
+    "openpyxl==3.1.2",
+    "alpaca-trade-api==3.0.2",
+    "pandas-market-calendars==4.3.1",
+    "requests==2.31.0"
 ]
 
 [project.optional-dependencies]
@@ -42,11 +46,11 @@ dev = [
 ]
 
 [tool.setuptools]
-package-dir = { "quantum_engine" = "src/quantum_engine", "utils" = "src/utils", "quantum_portfolio_optimizer" = "quantum_portfolio_optimizer", "ui" = "src/ui" }
+package-dir = { "quantum_engine" = "src/quantum_engine", "utils" = "src/utils", "quantum_portfolio_optimizer" = "quantum_portfolio_optimizer", "ui" = "src/ui", "analytics" = "src/analytics" }
 
 [tool.setuptools.packages.find]
 where = [".", "src"]
-include = ["quantum_portfolio_optimizer*", "quantum_engine*", "utils*", "ui*"]
+include = ["quantum_portfolio_optimizer*", "quantum_engine*", "utils*", "ui*", "analytics*"]
 
 [tool.black]
 line-length = 88

@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
 
 from quantum_engine.backend_manager import BackendManager
 from .styles import Theme
-from .widgets import PortfolioWidget, QuantumWidget, ResultsWidget
+from .widgets import AnalyticsWidget, PortfolioWidget, QuantumWidget, ResultsWidget, TradingWidget
 
 
 class MainWindow(QMainWindow):
@@ -122,16 +122,15 @@ class MainWindow(QMainWindow):
         )
         self.quantum_widget = QuantumWidget(self.backend_manager, self)
         self.results_widget = ResultsWidget(self)
-        self.analytics_widget = self._build_placeholder_widget(
-            "Analytics Dashboard",
-            "Visualize risk decomposition, factor exposures, and scenario analyses.",
-        )
+        self.analytics_widget = AnalyticsWidget(self)
+        self.trading_widget = TradingWidget(self)
 
         self.tabs.addTab(self.portfolio_widget, "Portfolio Management")
         self.tabs.addTab(self.market_data_widget, "Market Data")
         self.tabs.addTab(self.quantum_widget, "Quantum Computing")
         self.tabs.addTab(self.results_widget, "Results")
         self.tabs.addTab(self.analytics_widget, "Analytics")
+        self.tabs.addTab(self.trading_widget, "Trading")
 
         self.setCentralWidget(self.tabs)
 

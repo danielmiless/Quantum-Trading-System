@@ -4,6 +4,8 @@ from .main_window import MainWindow
 from .controllers.quantum_controller import QuantumController, QuantumJobConfig
 from .controllers.portfolio_controller import PortfolioController, PortfolioAsset
 from .dialogs.settings_dialog import SettingsDialog
+from .widgets.analytics_widget import AnalyticsWidget
+from .widgets.trading_widget import TradingWidget
 
 __all__ = [
     "MainWindow",
@@ -12,5 +14,7 @@ __all__ = [
     "PortfolioController",
     "PortfolioAsset",
     "SettingsDialog",
+    "AnalyticsWidget",
+    "TradingWidget",
 ]
 
