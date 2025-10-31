@@ -1,0 +1,79 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+**/.Trash
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Packaging
+build/
+dist/
+*.egg-info/
+*.eggs/
+htmlcov/
+
+# Testing
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+coverage.xml
+*.cover
+*.py,cover
+
+# Type checking
+.mypy_cache/
+dmypy.json
+mypy-report/
+
+# Linters & formatters
+.ruff_cache/
+.black-cache/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Qt/PySide
+*.pyi
+*.qrc
+*.pyproject.user
+*.qmlc
+*.jsc
+.qt/
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env
+.env.*
+!.env.template
+
+# Data files
+data/
+*.sqlite3
+
+# Cache
+cache/
+__pypackages__/
+
+# User specific files
+*.local
+*.orig
+
+
